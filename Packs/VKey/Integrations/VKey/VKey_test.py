@@ -23,6 +23,7 @@ from VKey import (
     fetch_events,
     safe_send_events_to_xsiam,
     get_events_command,
+    main as vkey_main,
     VENDOR,
     PRODUCT
 )
@@ -102,5 +103,33 @@ def test_get_events_command():
 
         # 2. Push mode (should_push_events=true)
         res_push = get_events_command(client, {"limit": "5", "table": "threat", "should_push_events": "true"})
-        assert f"(pushed to dataset {VENDOR}_{PRODUCT}_raw)" in res_push.readable_output
+        assert "(pushed to dataset vkey_vos_raw)" in res_push.readable_output
         mock_send.assert_called_once()
+
+
+def test_main_test_module_string_key():
+    """Test main() execution with string subscription_key."""
+    params = {
+        "url": "https://example.com/bsi",
+        "subscription_key": "raw-string-key"
+    }
+    with patch.object(demisto, "params", return_value=params), \
+         patch.object(demisto, "command", return_value="test-module"), \
+         patch.object(demisto, "results") as mock_results, \
+         patch("VKey.test_module", return_value="ok"):
+        vkey_main()
+        mock_results.assert_called_once_with("ok")
+
+
+def test_main_test_module_dict_key():
+    """Test main() execution with encrypted/dict subscription_key."""
+    params = {
+        "url": "https://example.com/bsi",
+        "subscription_key": {"password": "nested-dict-key"}
+    }
+    with patch.object(demisto, "params", return_value=params), \
+         patch.object(demisto, "command", return_value="test-module"), \
+         patch.object(demisto, "results") as mock_results, \
+         patch("VKey.test_module", return_value="ok"):
+        vkey_main()
+        mock_results.assert_called_once_with("ok")

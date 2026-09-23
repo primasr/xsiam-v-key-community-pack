@@ -227,7 +227,8 @@ def main():
     command = demisto.command()
 
     base_url = params.get('url', '').strip()
-    subscription_key = params.get('subscription_key', {}).get('password', '') or params.get('subscription_key', '')
+    raw_sub_key = params.get('subscription_key', '')
+    subscription_key = raw_sub_key.get('password', '') if isinstance(raw_sub_key, dict) else str(raw_sub_key)
     verify_cert = not params.get('insecure', False)
     proxy = params.get('proxy', False)
 
