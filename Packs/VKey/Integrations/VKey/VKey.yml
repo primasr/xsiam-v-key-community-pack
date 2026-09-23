@@ -1,0 +1,78 @@
+commonfields:
+  id: VKey
+  version: -1
+name: VKey
+display: V-Key V-OS Threat Intelligence
+category: Endpoint
+description: Ingests mobile runtime threats, device inventory, and application security telemetry from V-Key V-OS BSI.
+fromversion: 6.8.0
+configuration:
+  - display: V-Key BSI Endpoint URL (e.g., https://stg-apim-public.azure-api.net/bsi)
+    name: url
+    type: 0
+    required: true
+  - display: APIM Subscription Key (Ocp-Apim-Subscription-Key)
+    name: subscription_key
+    type: 4
+    required: true
+  - display: Fetch incidents
+    name: isFetch
+    type: 8
+    required: false
+  - display: Incident type
+    name: incidentType
+    type: 13
+    required: false
+  - display: "First Fetch Lookback Window in Minutes (Default: 15)"
+    name: first_fetch_time
+    type: 0
+    defaultvalue: "15"
+    required: false
+  - display: "Max Records Per Fetch Run (Default: 1000)"
+    name: max_fetch
+    type: 0
+    defaultvalue: "1000"
+    required: false
+  - display: Trust any certificate (not secure)
+    name: insecure
+    type: 8
+    required: false
+  - display: Use system proxy settings
+    name: proxy
+    type: 8
+    required: false
+script:
+  type: python
+  subtype: python3
+  isfetch: true
+  runonce: false
+  dockerimage: demisto/python3:latest
+  commands:
+    - name: vkey-get-threats
+      description: Manually query recent telemetry records from V-Key BSI.
+      arguments:
+        - name: table
+          description: "Target table: threat, device, application, or heartbeat (default: threat)."
+          defaultValue: "threat"
+        - name: time_window_minute
+          description: "Lookback window in minutes (default: 60)."
+          defaultValue: "60"
+        - name: limit
+          description: "Maximum records to retrieve (default: 20)."
+          defaultValue: "20"
+      outputs:
+        - contextPath: VKey.Telemetry.table
+          description: Source table name.
+          type: String
+        - contextPath: VKey.Telemetry.request_id
+          description: Unique telemetry transaction UUID.
+          type: String
+        - contextPath: VKey.Telemetry.device_id
+          description: Unique V-OS device identifier hash.
+          type: String
+        - contextPath: VKey.Telemetry.received_at
+          description: Ingestion timestamp.
+          type: String
+        - contextPath: VKey.Telemetry.threat_info
+          description: Attack or violation signature description.
+          type: String

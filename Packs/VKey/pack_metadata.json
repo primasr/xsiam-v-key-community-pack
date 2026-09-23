@@ -1,0 +1,49 @@
+{
+    "name": "V-Key V-OS Threat Intelligence",
+    "description": "Collects mobile application runtime security events, device inventory, and app integrity telemetry from V-Key V-OS BSI into Cortex XSIAM.",
+    "support": "community",
+    "currentVersion": "1.0.0",
+    "author": "Prima Secondary Ramadhan",
+    "url": "https://github.com/primasr",
+    "email": "prima.s.r.2001@gmail.com",
+    "categories": [
+        "Endpoint",
+        "Analytics & SIEM"
+    ],
+    "tags": [
+        "SIEM",
+        "Security",
+        "Mobile Security",
+        "V-Key",
+        "V-OS",
+        "RASP",
+        "Threat Intelligence",
+        "Event Collector"
+    ],
+    "useCases": [
+        "Ingest V-Key V-OS runtime mobile security violations (Jailbreak/Root, Hooking, Debuggers, Tampering) into Cortex XSIAM.",
+        "Collect mobile device hardware profiles and application package telemetry for asset context.",
+        "Automate threat correlation and response for protected mobile banking and enterprise applications."
+    ],
+    "keywords": [
+        "v-key",
+        "vkey",
+        "v-os",
+        "vos",
+        "mobile security",
+        "rasp",
+        "threat intelligence",
+        "siem",
+        "collector"
+    ],
+    "marketplaces": [
+        "marketplacev2",
+        "xsoar"
+    ],
+    "githubUser": [
+        "primasr"
+    ],
+    "defaultDataSource": "VKey",
+    "dependencies": {},
+    "displayedImages": []
+}
