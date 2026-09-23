@@ -36,7 +36,7 @@ OUTPUT_DIR = SCRIPT_DIR / "vkey_data_output"
 
 
 def query_api_page(table_name: str, time_window_minute: int, limit: int, offset: int = 0, max_retries: int = 3) -> dict:
-    """Sends a single paginated query to the V-Key BSI endpoint."""
+    """Sends a single paginated query to the V-Key Cloud SIEM endpoint."""
     headers = {
         "Content-Type": "application/json",
         "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,

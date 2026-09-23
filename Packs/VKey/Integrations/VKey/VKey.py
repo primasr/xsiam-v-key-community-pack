@@ -16,7 +16,7 @@ PRODUCT = "vos"  # Ingests to dataset: vkey_vos_raw
 
 class VKeyClient(BaseClient):
     """
-    Client to interact with the V-Key V-OS BSI API Gateway.
+    Client to interact with the V-Key V-OS Cloud SIEM API Gateway.
     """
 
     def __init__(self, base_url, subscription_key, verify=True, proxy=False):
@@ -30,7 +30,7 @@ class VKeyClient(BaseClient):
 
     def query_table_page(self, table_name, limit=1000, offset=0, time_window_minute=15):
         """
-        Sends paginated JSON request to V-Key BSI endpoint.
+        Sends paginated JSON request to V-Key SIEM endpoint.
         """
         payload = {
             "request": {

@@ -7,15 +7,15 @@ commonfields:
   version: -1
 name: VKey
 display: V-Key V-OS Threat Intelligence Event Collector
-description: Collects mobile runtime threats, device inventory, and application security telemetry from V-Key V-OS BSI into Cortex XSIAM datasets.
+description: Collects mobile runtime threats, device inventory, and application security telemetry from V-Key V-OS Cloud SIEM API into Cortex XSIAM datasets.
 fromversion: 6.8.0
 configuration:
-  - display: V-Key BSI Endpoint URL (e.g., https://stg-apim-public.azure-api.net/bsi)
+  - display: V-Key Cloud SIEM Endpoint URL (e.g., https://{tenant-host}/{path})
     name: url
     type: 0
     required: true
     section: Connect
-    additionalinfo: The base URL of the V-Key APIM BSI Gateway.
+    additionalinfo: The base URL of the V-Key APIM Cloud SIEM Gateway.
   - display: APIM Subscription Key (Ocp-Apim-Subscription-Key)
     name: subscription_key
     type: 4
@@ -73,7 +73,7 @@ script:
   dockerimage: demisto/python3:latest
   commands:
     - name: vkey-get-events
-      description: Manually query recent telemetry records from V-Key BSI and optionally push to dataset.
+      description: Manually query recent telemetry records from V-Key SIEM API and optionally push to dataset.
       arguments:
         - name: table
           description: "Target table: threat, device, application, or heartbeat (default: threat)."

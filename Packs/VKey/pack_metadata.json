@@ -1,6 +1,6 @@
 {
     "name": "V-Key V-OS Threat Intelligence",
-    "description": "Collects mobile application runtime security events, device inventory, and app integrity telemetry from V-Key V-OS BSI into Cortex XSIAM.",
+    "description": "Collects mobile application runtime security events, device inventory, and app integrity telemetry from V-Key V-OS Cloud SIEM API into Cortex XSIAM.",
     "support": "community",
     "currentVersion": "1.0.0",
     "author": "Prima Secondary Ramadhan",
@@ -23,7 +23,7 @@
     "useCases": [
         "Ingest V-Key V-OS runtime mobile security violations (Jailbreak/Root, Hooking, Debuggers, Tampering) into Cortex XSIAM.",
         "Collect mobile device hardware profiles and application package telemetry for asset context.",
-        "Automate threat correlation and response for protected mobile banking and enterprise applications."
+        "Automate threat correlation and response for protected mobile applications."
     ],
     "keywords": [
         "v-key",

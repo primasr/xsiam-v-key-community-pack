@@ -5,13 +5,13 @@
 [![Cortex XSIAM](https://img.shields.io/badge/Cortex-XSIAM-orange.svg)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
 
-Community-developed **Cortex XSIAM Content Pack** for integrating **V-Key V-OS Mobile Application Protection & Business Security Intelligence (BSI)**.
+Community-developed **Cortex XSIAM Content Pack** for integrating **V-Key V-OS Mobile Application Protection & Threat Intelligence**.
 
 ---
 
 ## 📌 Project Overview
 
-This content pack enables continuous ingestion, normalization, and SOC analysis of mobile application security violations and device telemetry from V-Key's Azure APIM Gateway into **Cortex XSIAM**.
+This content pack enables continuous ingestion, normalization, and SOC analysis of mobile application security violations and device telemetry from V-Key's Cloud SIEM API Gateway into **Cortex XSIAM**.
 
 ### Telemetry Datasets Collected
 - **`threat`**: Runtime mobile attacks (Root/Jailbreak, Frida/Xposed hooking, Debuggers, Tampering, Malware).
@@ -35,7 +35,7 @@ v-key-community-pack/
 ├── .env.example                  # Environment configuration template
 ├── .gitignore
 ├── README.md                     # Main repository documentation
-├── Documentation/                # Official and reference documentation
+├── Documentation/                # Reference documentation folder
 │   └── VS-OS Threat Intelligence SIEM API Guide.md
 ├── tools/                        # Local developer utilities
 │   ├── check_connection.py       # Standalone local fetcher & JSON exporter
@@ -57,7 +57,7 @@ v-key-community-pack/
             └── VKey/
                 ├── VKey.py       # Integration source code (BaseClient)
                 ├── VKey.yml      # Integration YAML specification
-                ├── VKey_test.py  # Pytest unit tests (100% passing)
+                ├── VKey_test.py  # Pytest unit tests (6/6 passing)
                 ├── VKey_description.md
                 ├── VKey_image.png
                 └── README.md     # Integration parameter & command guide
