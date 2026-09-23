@@ -41,3 +41,7 @@ htmlcov/
 
 # Antigravity Conversation
 agy.sh
+
+# Personal reference guides
+contributing_content.md
+install_demisto.md
