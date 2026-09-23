@@ -1,55 +1,79 @@
+category: Analytics & SIEM
+sectionorder:
+  - Connect
+  - Collect
 commonfields:
   id: VKey
   version: -1
 name: VKey
-display: V-Key V-OS Threat Intelligence
-category: Endpoint
-description: Ingests mobile runtime threats, device inventory, and application security telemetry from V-Key V-OS BSI.
+display: V-Key V-OS Threat Intelligence Event Collector
+description: Collects mobile runtime threats, device inventory, and application security telemetry from V-Key V-OS BSI into Cortex XSIAM datasets.
 fromversion: 6.8.0
 configuration:
   - display: V-Key BSI Endpoint URL (e.g., https://stg-apim-public.azure-api.net/bsi)
     name: url
     type: 0
     required: true
+    section: Connect
+    additionalinfo: The base URL of the V-Key APIM BSI Gateway.
   - display: APIM Subscription Key (Ocp-Apim-Subscription-Key)
     name: subscription_key
     type: 4
     required: true
-  - display: Fetch incidents
-    name: isFetch
-    type: 8
-    required: false
-  - display: Incident type
-    name: incidentType
-    type: 13
-    required: false
-  - display: "First Fetch Lookback Window in Minutes (Default: 15)"
-    name: first_fetch_time
-    type: 0
-    defaultvalue: "15"
-    required: false
-  - display: "Max Records Per Fetch Run (Default: 1000)"
-    name: max_fetch
-    type: 0
-    defaultvalue: "1000"
-    required: false
-  - display: Trust any certificate (not secure)
+    section: Connect
+    additionalinfo: The Azure APIM Subscription Key for authenticating API requests.
+  - display: Trust any certificate (insecure)
     name: insecure
     type: 8
     required: false
+    defaultvalue: true
+    section: Connect
+    additionalinfo: When selected, HTTPS certificate validation will be skipped.
   - display: Use system proxy settings
     name: proxy
     type: 8
     required: false
+    defaultvalue: false
+    section: Connect
+    additionalinfo: When selected, system HTTP(S) proxy settings will be used.
+  - display: Fetch events
+    name: isFetchEvents
+    type: 8
+    required: false
+    defaultvalue: true
+    section: Collect
+    additionalinfo: Enable automatic background collection of V-Key V-OS threat telemetry into Cortex XSIAM.
+  - display: Events Fetch Interval
+    name: eventFetchInterval
+    type: 19
+    required: false
+    defaultvalue: '5'
+    advanced: true
+    section: Collect
+    additionalinfo: Time interval (in minutes) between consecutive fetch-events executions.
+  - display: First Fetch Lookback Window in Minutes
+    name: first_fetch_time
+    type: 0
+    defaultvalue: '15'
+    required: false
+    section: Collect
+    additionalinfo: Initial query lookback window in minutes when running for the first time.
+  - display: Max Records Per Fetch Run
+    name: max_fetch
+    type: 0
+    defaultvalue: '1000'
+    required: false
+    section: Collect
+    additionalinfo: Maximum records retrieved per execution run across tables.
 script:
   type: python
   subtype: python3
-  isfetch: true
+  isfetchevents: true
   runonce: false
   dockerimage: demisto/python3:latest
   commands:
-    - name: vkey-get-threats
-      description: Manually query recent telemetry records from V-Key BSI.
+    - name: vkey-get-events
+      description: Manually query recent telemetry records from V-Key BSI and optionally push to dataset.
       arguments:
         - name: table
           description: "Target table: threat, device, application, or heartbeat (default: threat)."
@@ -60,6 +84,9 @@ script:
         - name: limit
           description: "Maximum records to retrieve (default: 20)."
           defaultValue: "20"
+        - name: should_push_events
+          description: "Whether to push retrieved events directly to dataset vkey_vos_raw (true/false)."
+          defaultValue: "false"
       outputs:
         - contextPath: VKey.Telemetry.table
           description: Source table name.
