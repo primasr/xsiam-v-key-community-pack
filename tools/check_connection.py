@@ -19,14 +19,20 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Find .env in current or parent directory
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+
+load_dotenv(SCRIPT_DIR / ".env")
+load_dotenv(REPO_ROOT / ".env")
+load_dotenv(REPO_ROOT / ".env.dev")
+load_dotenv(REPO_ROOT / ".env.prod")
 
 BASE_URL = os.getenv("Base_URL")
 SUBSCRIPTION_KEY = os.getenv("Subscription_Key")
 
 VALID_TABLES = ["threat", "device", "application", "heartbeat"]
-OUTPUT_DIR = Path("vkey_data_output")
+OUTPUT_DIR = SCRIPT_DIR / "vkey_data_output"
 
 
 def query_api_page(table_name: str, time_window_minute: int, limit: int, offset: int = 0, max_retries: int = 3) -> dict:
