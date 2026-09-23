@@ -5,8 +5,7 @@ from CommonServerUserPython import *
 import json
 import time
 import traceback
-from datetime import datetime, timezone
-from typing import Dict, Any, List, Tuple
+from datetime import datetime
 
 # Constants
 INTEGRATION_NAME = "V-Key V-OS Threat Intelligence Event Collector"
@@ -20,7 +19,7 @@ class VKeyClient(BaseClient):
     Client to interact with the V-Key V-OS BSI API Gateway.
     """
 
-    def __init__(self, base_url: str, subscription_key: str, verify: bool = True, proxy: bool = False):
+    def __init__(self, base_url, subscription_key, verify=True, proxy=False):
         headers = {
             'Content-Type': 'application/json',
             'Ocp-Apim-Subscription-Key': subscription_key,
@@ -29,7 +28,7 @@ class VKeyClient(BaseClient):
         }
         super().__init__(base_url=base_url, verify=verify, proxy=proxy, headers=headers)
 
-    def query_table_page(self, table_name: str, limit: int = 1000, offset: int = 0, time_window_minute: int = 15) -> Dict[str, Any]:
+    def query_table_page(self, table_name, limit=1000, offset=0, time_window_minute=15):
         """
         Sends paginated JSON request to V-Key BSI endpoint.
         """
@@ -52,11 +51,11 @@ class VKeyClient(BaseClient):
             json_data=payload
         )
 
-    def fetch_all_table_records(self, table_name: str, time_window_minute: int, page_size: int = 1000, max_records: int = 5000) -> List[Dict[str, Any]]:
+    def fetch_all_table_records(self, table_name, time_window_minute, page_size=1000, max_records=5000):
         """
         Paginates through a table and tags records with 'table': table_name.
         """
-        records: List[Dict[str, Any]] = []
+        records = []
         offset = 0
         seen_in_batch = set()
 
@@ -78,7 +77,10 @@ class VKeyClient(BaseClient):
                     continue
                 if req_id:
                     seen_in_batch.add(req_id)
-                records.append({"table": table_name, **item})
+
+                tagged_item = dict(item)
+                tagged_item['table'] = table_name
+                records.append(tagged_item)
                 new_unique += 1
 
             if len(data) < page_size or new_unique == 0:
@@ -89,7 +91,7 @@ class VKeyClient(BaseClient):
         return records
 
 
-def safe_send_events_to_xsiam(events: List[Dict[str, Any]], vendor: str, product: str):
+def safe_send_events_to_xsiam(events, vendor, product):
     """
     Safely sends raw JSON events to Cortex XSIAM dataset with error handling.
     """
@@ -97,10 +99,10 @@ def safe_send_events_to_xsiam(events: List[Dict[str, Any]], vendor: str, product
         try:
             send_events_to_xsiam(events=[], vendor=vendor, product=product)
         except Exception as e:
-            demisto.debug(f"{LOG_PREFIX} Health check ping skipped: {e}")
+            demisto.debug("{} Health check ping skipped: {}".format(LOG_PREFIX, e))
         return
 
-    demisto.info(f"{LOG_PREFIX} Sending {len(events)} events to dataset {vendor}_{product}_raw")
+    demisto.info("{} Sending {} events to dataset {}_{}_raw".format(LOG_PREFIX, len(events), vendor, product))
     send_events_to_xsiam(
         events=events,
         vendor=vendor,
@@ -109,7 +111,7 @@ def safe_send_events_to_xsiam(events: List[Dict[str, Any]], vendor: str, product
     )
 
 
-def test_module(client: VKeyClient) -> str:
+def test_module(client):
     """
     Tests API connectivity for the 'Test' button in XSIAM UI.
     """
@@ -117,17 +119,12 @@ def test_module(client: VKeyClient) -> str:
         response = client.query_table_page(table_name="threat", limit=1, time_window_minute=5)
         if isinstance(response, dict) and "data" in response:
             return 'ok'
-        raise DemistoException(f'Unexpected response: {response}')
+        raise DemistoException("Unexpected response structure: {}".format(response))
     except Exception as e:
-        return f'Failed to connect to V-Key API: {str(e)}'
+        return "Failed to connect to V-Key API: {}".format(str(e))
 
 
-def fetch_events(
-    client: VKeyClient,
-    last_run: Dict[str, Any],
-    first_fetch_window: int = 15,
-    max_fetch: int = 1000
-) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+def fetch_events(client, last_run, first_fetch_window=15, max_fetch=1000):
     """
     Option 1: Smart Sub-Schedules inside Cortex XSIAM fetch-events.
     - threat:      every run (5 min cadence, 6 min window)
@@ -143,7 +140,7 @@ def fetch_events(
     last_heartbeat_time = next_run.get('last_heartbeat_time', 0)
     seen_ids = set(next_run.get('seen_ids', []))
 
-    all_raw_records: List[Dict[str, Any]] = []
+    all_raw_records = []
 
     # 1. Threat Table: ALWAYS polled every run (Cadence: 5m, Window: 6m)
     threat_window = 6 if last_run else first_fetch_window
@@ -172,13 +169,13 @@ def fetch_events(
         next_run['last_heartbeat_time'] = now
 
     # Deduplicate events using table:request_id
-    new_events: List[Dict[str, Any]] = []
+    new_events = []
     new_seen_ids = []
 
     for record in all_raw_records:
         req_id = record.get('request_id')
         table_type = record.get('table', 'unknown')
-        unique_key = f"{table_type}:{req_id}" if req_id else str(hash(json.dumps(record, sort_keys=True)))
+        unique_key = "{}:{}".format(table_type, req_id) if req_id else str(hash(json.dumps(record, sort_keys=True)))
 
         if unique_key in seen_ids:
             continue
@@ -190,11 +187,11 @@ def fetch_events(
     next_run['last_fetch_time'] = now
     next_run['event_count'] = len(new_events)
 
-    demisto.info(f"{LOG_PREFIX} Extracted {len(new_events)} new unique events across all tables.")
+    demisto.info("{} Extracted {} new unique events across all tables.".format(LOG_PREFIX, len(new_events)))
     return next_run, new_events
 
 
-def get_events_command(client: VKeyClient, args: Dict[str, Any]) -> CommandResults:
+def get_events_command(client, args):
     """
     Manual War Room command: !vkey-get-events
     Allows previewing or pushing events on-demand.
@@ -209,10 +206,10 @@ def get_events_command(client: VKeyClient, args: Dict[str, Any]) -> CommandResul
     if should_push and records:
         safe_send_events_to_xsiam(events=records, vendor=VENDOR, product=PRODUCT)
 
-    status_note = f"(pushed to dataset {VENDOR}_{PRODUCT}_raw)" if should_push else "(preview only, not pushed)"
+    status_note = "(pushed to dataset {}_{}_raw)".format(VENDOR, PRODUCT) if should_push else "(preview only, not pushed)"
 
     readable_output = tableToMarkdown(
-        name=f"V-Key Records ({table.upper()} - Last {window} min) {status_note}",
+        name="V-Key Records ({} - Last {} min) {}".format(table.upper(), window, status_note),
         t=records,
         removeNull=True
     )
@@ -262,11 +259,11 @@ def main():
             return_results(get_events_command(client, demisto.args()))
 
         else:
-            raise NotImplementedError(f'Command {command} is not implemented')
+            raise NotImplementedError("Command {} is not implemented".format(command))
 
     except Exception as e:
-        demisto.error(f"{LOG_PREFIX} Execution failed: {e}\n{traceback.format_exc()}")
-        return_error(f"Failed to execute '{command}' command in {INTEGRATION_NAME}.\n\nError: {str(e)}")
+        demisto.error("{} Execution failed: {}\n{}".format(LOG_PREFIX, e, traceback.format_exc()))
+        return_error("Failed to execute '{}' command in {}.\n\nError: {}".format(command, INTEGRATION_NAME, str(e)))
 
 
 if __name__ in ('__main__', '__builtin__', 'builtins'):
